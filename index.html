@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global Plate Magazine Cover Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Define custom fonts */
+        .font-serif-display {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-sans-inter {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Define aspect ratio for the cover wrapper to simulate a magazine page (2:3 ratio is common) */
+        .magazine-wrapper {
+            width: 100%;
+            max-width: 480px; /* Max width of a typical magazine (e.g., 8.5 inches wide) */
+            aspect-ratio: 2 / 3; /* Fixed magazine aspect ratio for large screens */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        /* Ensure the body takes up full viewport height for centering */
+        body {
+            min-height: 100vh;
+        }
+
+        /* Force the main headline to use a custom outline/shadow effect for impact */
+        .headline-text {
+            text-shadow: 
+                -1px -1px 0 #FAF9F6,  
+                1px -1px 0 #FAF9F6,
+                -1px 1px 0 #FAF9F6,
+                1px 1px 0 #FAF9F6,
+                0 0 5px rgba(0, 0, 0, 0.2); 
+        }
+
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'magazine-saffron': '#E69A00', /* Deep Saffron Yellow */
+                        'magazine-orange': '#AA4A1C', /* Burnt Orange */
+                        'magazine-olive': '#545A39', /* Rich Olive Green */
+                        'magazine-creme': '#FAF9F6', /* Creamy White */
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center font-sans-inter">
+
+    <!-- Magazine Cover Container (Fixed aspect ratio on large screens) -->
+    <div class="magazine-wrapper bg-magazine-creme text-magazine-olive rounded-xl overflow-hidden relative flex flex-col h-auto max-h-[95vh] lg:h-auto">
+        
+        <!-- Header & Masthead Section -->
+        <header class="p-4 bg-magazine-orange text-magazine-creme flex justify-between items-center rounded-t-xl shrink-0">
+            <div class="text-left">
+                <h1 class="font-serif-display text-3xl font-black tracking-widest leading-none">THE GLOBAL PLATE</h1>
+                <p class="mt-0.5 text-xs opacity-80">Food & Culinary Travel</p>
+            </div>
+            <div class="text-right text-xs space-y-0.5">
+                <p class="font-bold">NOV / DEC 2025</p>
+                <p>US $<span class="text-magazine-saffron font-extrabold text-sm">7.99</span></p>
+                <p class="opacity-80"><a href="https://www.google.com/search?q=GlobalPlateMag.com" target="_blank" class="hover:underline">GlobalPlateMag.com</a></p>
+            </div>
+        </header>
+
+        <!-- Main Content Area - Image dominates, headlines overlay -->
+        <main class="relative flex-grow">
+
+            <!-- Main Cover Image -->
+            <div class="absolute inset-0">
+                 <img 
+                    src="https://placehold.co/800x1200/AA4A1C/FAF9F6/png?text=ITALIAN+HOLIDAY+FEAST" 
+                    alt="Close-up of handmade tortellini en brodo on a rustic table in an Italian kitchen with golden lighting."
+                    class="w-full h-full object-cover"
+                    onerror="this.onerror=null; this.src='https://placehold.co/800x1200/AA4A1C/FAF9F6/png?text=Loading+Failed+Image'"
+                />
+                <!-- Golden Light Effect overlaying the image for aesthetic flair -->
+                <div class="absolute inset-0 bg-yellow-400 opacity-10 pointer-events-none mix-blend-overlay"></div>
+            </div>
+
+            <!-- Headline and Feature Text Overlays -->
+            <div class="absolute inset-0 p-6 flex flex-col justify-between">
+                
+                <!-- TOP HEADLINE AREA -->
+                <div class="space-y-2">
+                    <!-- Main Story Headline - Large and impactful -->
+                    <h2 class="font-serif-display text-4xl sm:text-5xl font-extrabold leading-tight text-magazine-saffron headline-text">
+                        A GRAND TOUR OF ITALY'S HIDDEN HOLIDAY KITCHENS
+                    </h2>
+                    <h3 class="text-xl font-bold text-magazine-orange headline-text">
+                        15 Classic Recipes Reimagined
+                    </h3>
+                </div>
+
+                <!-- BOTTOM FEATURES AND BARCODE AREA -->
+                <div class="space-y-4 pt-4">
+                    <!-- Side Feature List (Horizontal/Bottom alignment) -->
+                    <div class="bg-magazine-creme/90 backdrop-blur-sm p-4 rounded-lg border-l-4 border-magazine-olive shadow-xl">
+                        <h4 class="text-sm font-extrabold text-magazine-olive border-b border-magazine-saffron pb-1 mb-2">MORE INSIDE</h4>
+                        <div class="space-y-2 text-sm text-magazine-olive">
+                            <!-- 2nd Story -->
+                            <p class="leading-tight">
+                                <span class="font-bold text-magazine-orange">SPICE TRAIL:</span> How One Ingredient Changed Winter Desserts Forever
+                            </p>
+                            <!-- 3rd Story -->
+                            <p class="leading-tight">
+                                <span class="font-bold text-magazine-orange">TOURIST TRAP:</span> Finding Authentic Street Food in Marrakech
+                            </p>
+                            <!-- 4th Story -->
+                            <p class="leading-tight">
+                                <span class="font-bold text-magazine-orange">QUICK & COZY:</span> 5 Weeknight Dinners That Taste Like a Weekend Feast
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Barcode and Price Container -->
+                    <div class="flex justify-end pr-0">
+                        <!-- Barcode Section (Bottom Right) -->
+                        <div class="w-32 h-16 flex flex-col items-center justify-end bg-magazine-creme p-1 rounded-sm border border-magazine-olive/30 shadow-md">
+                            <!-- Price Display above the code -->
+                            <div class="text-magazine-olive text-xs font-bold w-full text-center mb-0.5">
+                                US $<span class="text-magazine-orange text-sm font-extrabold">7.99</span>
+                            </div>
+
+                            <!-- Simple Barcode SVG Placeholder -->
+                            <svg class="w-full h-10" viewBox="0 0 100 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- White background for the code area -->
+                                <rect x="0" y="0" width="100" height="50" fill="#FFFFFF"/>
+                                
+                                <!-- Mock UPC/EAN Bars (representing a magazine code) -->
+                                <rect x="5" y="5" width="2" height="40" fill="#000000"/>
+                                <rect x="10" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="13" y="5" width="3" height="40" fill="#000000"/>
+                                <rect x="18" y="5" width="2" height="40" fill="#000000"/>
+                                <rect x="23" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="25" y="5" width="4" height="40" fill="#000000"/>
+                                
+                                <rect x="35" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="38" y="5" width="1" height="40" fill="#000000"/>
+                                
+                                <rect x="42" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="44" y="5" width="3" height="40" fill="#000000"/>
+                                <rect x="50" y="5" width="2" height="40" fill="#000000"/>
+                                <rect x="55" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="58" y="5" width="2" height="40" fill="#000000"/>
+                                <rect x="63" y="5" width="3" height="40" fill="#000000"/>
+                                
+                                <rect x="75" y="5" width="1" height="40" fill="#000000"/>
+                                <rect x="78" y="5" width="1" height="40" fill="#000000"/>
+
+                                <rect x="85" y="5" width="2" height="20" fill="#000000"/>
+                                <rect x="88" y="5" width="1" height="20" fill="#000000"/>
+
+                            </svg>
+                            <!-- Mock UPC Numbers -->
+                            <p class="text-[0.6rem] font-mono text-magazine-olive/80 mt-0.5">977123456789</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Footer/Motto (Optional, but adds polish) -->
+        <footer class="p-2 text-center text-xs bg-magazine-orange/80 text-magazine-creme/90 shrink-0">
+            Your Passport to the World's Most Incredible Flavors
+        </footer>
+    </div>
+
+</body>
+</html>
