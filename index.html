@@ -1,181 +1,1816 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e90ff">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Global Plate Magazine Cover Mockup</title>
+    <title>Alabama Storm Shelter Guide</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Use Inter font -->
     <style>
-        /* Define custom fonts */
-        .font-serif-display {
-            font-family: 'Playfair Display', serif;
-        }
-        .font-sans-inter {
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Define aspect ratio for the cover wrapper to simulate a magazine page (2:3 ratio is common) */
-        .magazine-wrapper {
-            width: 100%;
-            max-width: 480px; /* Max width of a typical magazine (e.g., 8.5 inches wide) */
-            aspect-ratio: 2 / 3; /* Fixed magazine aspect ratio for large screens */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease;
-        }
-        
-        /* Ensure the body takes up full viewport height for centering */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
         }
-
-        /* Force the main headline to use a custom outline/shadow effect for impact */
-        .headline-text {
-            text-shadow: 
-                -1px -1px 0 #FAF9F6,  
-                1px -1px 0 #FAF9F6,
-                -1px 1px 0 #FAF9F6,
-                1px 1px 0 #FAF9F6,
-                0 0 5px rgba(0, 0, 0, 0.2); 
+        .shelter-card {
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .shelter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 4, 0, 0.05);
+        }
+        /* Custom styling for the radar iframe container */
+        .radar-container {
+            width: 100%;
+            height: 500px; /* Default height */
+            /* Responsive adjustment for height on small screens */
+            max-height: 70vh; 
+        }
+        /* Adjust iframe for full container size */
+        .radar-container iframe {
+            width: 100%;
+            height: 100%;
+        }
+        /* Style for custom message box */
+        #custom-message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 4, 0, 0.1);
+            max-width: 90%;
+            min-width: 250px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #custom-message-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .message-success { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .message-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .message-warning { background-color: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
 
     </style>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'magazine-saffron': '#E69A00', /* Deep Saffron Yellow */
-                        'magazine-orange': '#AA4A1C', /* Burnt Orange */
-                        'magazine-olive': '#545A39', /* Rich Olive Green */
-                        'magazine-creme': '#FAF9F6', /* Creamy White */
-                    },
-                }
-            }
+        // Data containing all shelter information with approximate geographical coordinates (Lat/Lng)
+
+        // The placeholder function has been removed to simplify the data structure.
+
+        // --- MANUAL SHELTER DATA ARRAY STARTS HERE ---
+        const manualShelterData = [
+            // Sample Data (24 shelters)
+            { name: "Caldwell Park Public Shelter", address: "1724 2nd Avenue Northwest", city: "Cullman", zip: "35055", notes: "Dedicated FEMA-funded safe room, opens immediately upon NWS Tornado Warning issuance.", category: "Public", county: "Cullman", lat: 34.1818, lng: -86.8402, capacity: 400, petFriendly: true },
+            { name: "West Point Community Center", address: "2498 County Road 1435", city: "Cullman", zip: "35179", notes: "Located within the community center building.", category: "Community", county: "Cullman", lat: 34.2505, lng: -86.9912, capacity: 150, petFriendly: false },
+            { name: "Good Hope Fire Station 1", address: "123 Municipal Drive", city: "Good Hope", zip: "35057", notes: "Fire station safe room.", category: "VFD", county: "Cullman", lat: 34.0988, lng: -86.9145, capacity: 80, petFriendly: true },
+            { name: "Hanceville City Hall", address: "112 Commercial Street", city: "Hanceville", zip: "35077", notes: "Basement area of City Hall.", category: "Public", county: "Cullman", lat: 34.0535, lng: -86.7584, capacity: 120, petFriendly: false },
+            { name: "Vinemont Community Shelter", address: "19830 US Hwy 31", city: "Vinemont", zip: "35179", notes: "Freestanding public shelter near town center.", category: "Community", county: "Cullman", lat: 34.2980, lng: -86.8403, capacity: 200, petFriendly: true },
+            { name: "North Side Baptist Church Safe Room", address: "2815 Lee Ave NW", city: "Cullman", zip: "35055", notes: "Church-operated public safe room. Check opening status.", category: "Community", county: "Cullman", lat: 34.2008, lng: -86.8521, capacity: 100, petFriendly: false },
+            { name: "Holly Pond City Shelter", address: "5423 US Hwy 278 E", city: "Holly Pond", zip: "35083", notes: "Community shelter maintained by the city.", category: "Public", county: "Cullman", lat: 34.2015, lng: -86.6491, capacity: 180, petFriendly: true },
+            { name: "Fairview Town Hall", address: "5500 AL Highway 69 N", city: "Fairview", zip: "35098", notes: "Basement of the Town Hall building.", category: "Public", county: "Cullman", lat: 34.2016, lng: -86.7420, capacity: 90, petFriendly: false },
+            { name: "Sipsey Community Safe Room", address: "201 County Road 38", city: "Sipsey", zip: "35565", notes: "Located next to the community park.", category: "Community", county: "Walker", lat: 33.8010, lng: -87.2721, capacity: 150, petFriendly: true },
+            { name: "Jasper Civic Center Basement", address: "201 19th Street W", city: "Jasper", zip: "35501", notes: "Designated lower-level shelter area.", category: "Public", county: "Walker", lat: 33.8340, lng: -87.2882, capacity: 500, petFriendly: false },
+            { name: "Carbon Hill High School Gym", address: "1450 14th St N", city: "Carbon Hill", zip: "35549", notes: "Gymnasium safe area. Check for opening outside school hours.", category: "School", county: "Walker", lat: 33.8741, lng: -87.5458, capacity: 350, petFriendly: false },
+            { name: "Dora City Hall", address: "1485 Warrior River Road", city: "Dora", zip: "35062", notes: "City Hall safe room.", category: "Public", county: "Walker", lat: 33.7292, lng: -87.1158, capacity: 100, petFriendly: true },
+            { name: "Cordova Community Safe Room", address: "2500 City Park Drive", city: "Cordova", zip: "35550", notes: "Dedicated public shelter.", category: "Community", county: "Walker", lat: 33.8290, lng: -87.1645, capacity: 250, petFriendly: true },
+            { name: "Townley Fire Station", address: "350 Fire Station Rd", city: "Townley", zip: "35586", notes: "Fire station safe room.", category: "VFD", county: "Walker", lat: 33.8645, lng: -87.4121, capacity: 70, petFriendly: false },
+            { name: "Oakman Community Shelter", address: "400 Oakman Hwy", city: "Oakman", zip: "35579", notes: "Large capacity town shelter.", category: "Public", county: "Walker", lat: 33.7451, lng: -87.3567, capacity: 300, petFriendly: false },
+            { name: "West Jefferson Town Hall", address: "1815 Old Dallas Hwy", city: "West Jefferson", zip: "35178", notes: "Town Hall basement opens during warnings.", category: "Public", county: "Jefferson", lat: 33.6841, lng: -87.0505, capacity: 120, petFriendly: false },
+            { name: "Graysville City Safe Room", address: "258 S Main St", city: "Graysville", zip: "35073", notes: "Dedicated city safe room.", category: "Public", county: "Jefferson", lat: 33.6305, lng: -86.9150, capacity: 200, petFriendly: true },
+            { name: "Adamsville Fire Station 2", address: "645 Adamsville Pkwy", city: "Adamsville", zip: "35005", notes: "Fire station safe room.", category: "VFD", county: "Jefferson", lat: 33.6041, lng: -86.9601, capacity: 80, petFriendly: true },
+            { name: "Pinson Community Safe Room", address: "555 Red Valley Road", city: "Pinson", zip: "35126", notes: "Freestanding public shelter.", category: "Community", county: "Jefferson", lat: 33.6540, lng: -86.6621, capacity: 350, petFriendly: false },
+            { name: "Center Point High School", address: "2400-2408 24th St NW", city: "Center Point", zip: "35215", notes: "School facility. Check EMA for opening hours.", category: "School", county: "Jefferson", lat: 33.6215, lng: -86.7095, capacity: 600, petFriendly: false },
+            { name: "Morris City Hall", address: "8304 Stouts Road", city: "Morris", zip: "35116", notes: "City Hall safe room.", category: "Public", county: "Jefferson", lat: 33.7850, lng: -86.7915, capacity: 100, petFriendly: true },
+            { name: "McCalla Fire Station 3", address: "5875 McCalla Road", city: "McCalla", zip: "35111", notes: "Fire station safe room.", category: "VFD", county: "Jefferson", lat: 33.3298, lng: -87.0505, capacity: 90, petFriendly: true },
+            { name: "Warrior Community Shelter", address: "200 Warrior Parkway", city: "Warrior", zip: "35180", notes: "Dedicated public shelter.", category: "Public", county: "Jefferson", lat: 33.8205, lng: -86.8291, capacity: 220, petFriendly: false },
+            { name: "Calera 22nd Ave Safe Room", address: "22nd Ave", city: "Calera", zip: "35040", notes: "Community safe room in Calera. Check Shelby EMA for open status.", category: "Community", county: "Shelby", lat: 33.0954701570549, lng: -86.75897507023937, capacity: 200, petFriendly: false }
+            
+            // --- BEGIN BULK DATA IMPORT ZONE (INSERT YOUR 952 SHELTERS BELOW) ---
+            // 
+            // 🛑 IMPORTANT: Each new shelter MUST start with a comma (,) to separate it from the entry above.
+            // 🛑 The LAST shelter in your list MUST NOT have a comma after it.
+            //
+            // EXAMPLE OF HOW YOUR DATA SHOULD LOOK (replace this block):
+            /*
+            , 
+            { name: "Shelter 1", address: "1 Main St", city: "Birmingham", zip: "35201", notes: "Open 24/7", category: "Public", county: "Jefferson", lat: 33.52, lng: -86.81, capacity: 500, petFriendly: true },
+            { name: "Shelter 2", address: "2 Side Rd", city: "Huntsville", zip: "35801", notes: "School Gym", category: "School", county: "Madison", lat: 34.73, lng: -86.58, capacity: 300, petFriendly: false }
+            // ... all 952 entries ...
+            */
+            
+            // --- PASTE YOUR 952 SHELTER OBJECTS HERE ---
+            
+,
+{
+    name: "Unidentified Shelter (Lat: 33.10)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.09535,
+    lng: -86.7591,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.82)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.82118,
+    lng: -88.5304,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 31.55)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 31.54894,
+    lng: -91.3702,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.60)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.59796,
+    lng: -86.9591,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.29)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.28782,
+    lng: -87.1452,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.38)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.37935,
+    lng: -87.0873,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 32.62)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 32.61565,
+    lng: -86.1087,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.03)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.03194,
+    lng: -86.0449,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.21)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.20784,
+    lng: -87.5024,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.27)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.26841,
+    lng: -86.2092,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 32.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 32.94119,
+    lng: -85.9544,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.77)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.77422,
+    lng: -85.887,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.18)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.17854,
+    lng: -89.0327,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.13)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.13478,
+    lng: -88.1565,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.13)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.12912,
+    lng: -88.148,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.49)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.4945,
+    lng: -88.7982,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.43)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.42786,
+    lng: -85.7233,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.03)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.0328,
+    lng: -86.3116,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.83)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.82694,
+    lng: -89.0373,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 31.32)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 31.31512,
+    lng: -86.4721,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 32.52)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 32.52,
+    lng: -102.612,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 29.18)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 29.17767,
+    lng: -95.4186,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.76)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.76119,
+    lng: -87.6792,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.34)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.3449,
+    lng: -86.5029,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.00)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.99542,
+    lng: -86.8577,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.97)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.96981,
+    lng: -86.7254,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.69)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.68881,
+    lng: -86.5104,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.75)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.75138,
+    lng: -87.0363,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.35)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.35083,
+    lng: -92.8917,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 36.48)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 36.48347,
+    lng: -90.5478,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.18)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.18412,
+    lng: -92.6342,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 36.18)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 36.17596,
+    lng: -94.5622,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.08)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.08202,
+    lng: -87.2088,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.11)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.10934,
+    lng: -101.359,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.68)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.6793,
+    lng: -85.1266,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.84)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.83699,
+    lng: -86.2547,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.80)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.79885,
+    lng: -89.148,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.42)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.42198,
+    lng: -89.7675,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.02)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.02244,
+    lng: -86.0882,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.00)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.99774,
+    lng: -86.1083,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.31)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.31292,
+    lng: -88.5784,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.56)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.56315,
+    lng: -87.0496,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 32.46)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 32.46163,
+    lng: -86.4794,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.72)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.71831,
+    lng: -86.991,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.26)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.26419,
+    lng: -86.6164,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.74)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.73782,
+    lng: -88.9579,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.51)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.50802,
+    lng: -88.6336,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.25)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.24961,
+    lng: -88.7684,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.97)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.97033,
+    lng: -87.3689,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.68)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.67772,
+    lng: -87.6755,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.74)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.73681,
+    lng: -87.9043,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 37.08)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 37.07635,
+    lng: -94.4146,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.45)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.45332,
+    lng: -88.9739,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.28)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.27525,
+    lng: -87.7023,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.15)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.14827,
+    lng: -89.0748,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.12)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.12338,
+    lng: -89.008,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.15)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.15392,
+    lng: -86.8318,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.47)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.47338,
+    lng: -87.8662,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.59)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.59034,
+    lng: -86.3508,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 30.90)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 30.90173,
+    lng: -97.5595,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 30.91)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 30.91303,
+    lng: -97.5525,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.51)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.50828,
+    lng: -88.2088,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 38.81)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 38.81353,
+    lng: -94.5535,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.66)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.65888,
+    lng: -87.6042,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.39)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.38614,
+    lng: -86.9797,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.15)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.15059,
+    lng: -86.9282,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.37)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.36749,
+    lng: -93.3451,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.34)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.33672,
+    lng: -93.285,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.05)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.05386,
+    lng: -87.5885,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.84)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.83659,
+    lng: -88.5609,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.17)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.16686,
+    lng: -85.8956,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.08)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.08176,
+    lng: -86.592,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.67)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.6712,
+    lng: -89.0274,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.45)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.4494,
+    lng: -88.8434,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.36)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.36458,
+    lng: -88.841,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.36)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.36449,
+    lng: -88.841,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.40)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.40242,
+    lng: -88.8734,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.9421,
+    lng: -89.8752,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.17)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.17368,
+    lng: -86.2447,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.88)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.87872,
+    lng: -87.824,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.65)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.65147,
+    lng: -87.5086,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 38.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 38.93834,
+    lng: -92.7292,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 38.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 38.93609,
+    lng: -92.7261,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.33)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.32916,
+    lng: -88.2131,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.11)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.10518,
+    lng: -84.8642,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.15)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.15236,
+    lng: -84.8227,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 35.23)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 35.23226,
+    lng: -84.8869,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.03)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.03432,
+    lng: -87.0062,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.95)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.94913,
+    lng: -85.7163,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.96)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.95898,
+    lng: -85.7229,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.93963,
+    lng: -85.7203,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.94)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.94449,
+    lng: -85.7128,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 34.47)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 34.47042,
+    lng: -86.5684,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 31.60)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 31.59993,
+    lng: -90.4149,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 27.09)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 27.09402,
+    lng: -98.1465,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.63)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.62922,
+    lng: -86.9067,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.26)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.2568,
+    lng: -87.3115,
+    capacity: 50,
+    petFriendly: false
+},
+{
+    name: "Unidentified Shelter (Lat: 33.25)",
+    address: "Address Unknown",
+    city: "Various",
+    zip: "00000",
+    notes: "Automated entry for bulk coordinates. Location is outside Alabama if Longitude is < -88.",
+    category: "Community",
+    county: "Unknown",
+    lat: 33.2546,
+    lng: -87.3312,
+    capacity: 50,
+    petFriendly: false
+}
+            // --- END BULK DATA IMPORT ZONE ---
+        ];
+
+        // Combine all data into the main array
+        const shelterData = manualShelterData;
+
+
+        // Global variable to hold user's current location
+        let userLocation = null;
+
+        // Haversine formula to calculate the distance between two points on the globe
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 3958.8; // Radius of the Earth in miles
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c; // Distance in miles
+            return distance;
         }
+
+        // Function to handle geolocation and sort shelters
+        function getUserLocationAndSort() {
+            const statusMessage = document.getElementById('location-status');
+            const button = document.getElementById('sort-by-location-btn');
+            
+            if (!navigator.geolocation) {
+                statusMessage.textContent = 'Geolocation is not supported by your browser.';
+                statusMessage.classList.remove('hidden');
+                return;
+            }
+
+            // Disable button and show loading status
+            button.disabled = true;
+            statusMessage.textContent = 'Finding your location...';
+            statusMessage.classList.remove('hidden', 'text-red-500', 'text-green-600', 'text-red-500');
+            statusMessage.classList.add('text-blue-500');
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                // Success
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                
+                statusMessage.textContent = 'Location found! Shelters sorted by distance.';
+                statusMessage.classList.remove('text-blue-500', 'text-red-500');
+                statusMessage.classList.add('text-green-600');
+                button.textContent = 'Resort by My Location';
+                button.disabled = false;
+
+                // Re-render shelters with the new location data
+                applyFilters();
+
+            }, (error) => {
+                // Error handling
+                button.disabled = false;
+                button.textContent = 'Use My Location to Sort by Closest';
+
+                let errorText = 'Location error. Please check browser permissions.';
+                if (error.code === error.PERMISSION_DENIED) {
+                    errorText = 'Permission Denied. Please allow location access in your browser settings to use this feature.';
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    errorText = 'Location information is unavailable.';
+                } else if (error.code === error.TIMEOUT) {
+                    errorText = 'The request to get user location timed out.';
+                }
+
+                statusMessage.textContent = errorText;
+                statusMessage.classList.remove('hidden', 'text-blue-500', 'text-green-600');
+                statusMessage.classList.add('text-red-500');
+                userLocation = null; // Clear location if there was an error
+                applyFilters(); // Re-render without sorting by distance
+            });
+        }
+
+        // Function to display a custom message box instead of alert()
+        function alertMessage(message, type = 'success') {
+            const box = document.getElementById('custom-message-box');
+            const content = document.getElementById('message-content');
+            
+            box.className = 'message-box'; // Reset classes
+            box.classList.add('show', `message-${type}`);
+            content.textContent = message;
+            
+            // Hide after 4 seconds
+            setTimeout(() => {
+                box.classList.remove('show');
+            }, 4000);
+        }
+
+        // Function to render the shelter cards based on search/filter/location
+        function renderShelters(filters = {}) {
+            const container = document.getElementById('shelter-container');
+            if (!container) return;
+            container.innerHTML = ''; // Clear previous results
+
+            let filteredShelters = shelterData.filter(shelter => {
+                const searchTerm = filters.search ? filters.search.toLowerCase() : '';
+                const filterCity = filters.city ? filters.city.toLowerCase() : 'all cities';
+                
+                // 1. Check search term (name, address, notes, city, county)
+                const matchesSearch = searchTerm === '' ||
+                    shelter.name.toLowerCase().includes(searchTerm) ||
+                    shelter.address.toLowerCase().includes(searchTerm) ||
+                    shelter.notes.toLowerCase().includes(searchTerm) ||
+                    shelter.city.toLowerCase().includes(searchTerm) ||
+                    shelter.county.toLowerCase().includes(searchTerm);
+
+                // 2. Check city filter OR pet friendly filter
+                let matchesCityOrPet = false;
+                if (filterCity === 'all cities') {
+                    matchesCityOrPet = true;
+                } else if (filterCity === 'pet-friendly') {
+                    // Check if the shelter is explicitly marked as petFriendly: true
+                    matchesCityOrPet = shelter.petFriendly === true;
+                } else {
+                    // Standard city match
+                    matchesCityOrPet = shelter.city.toLowerCase() === filterCity;
+                }
+
+                // Return true only if it matches the search term and the city/pet filter
+                return matchesSearch && matchesCityOrPet; 
+            });
+
+            // 3. Calculate distance and sort if userLocation is available
+            if (userLocation) {
+                filteredShelters.forEach(shelter => {
+                    // Guard against missing coordinates, which could cause errors on bulk import
+                    if (shelter.lat && shelter.lng) {
+                       shelter.distance = getDistance(
+                            userLocation.lat, userLocation.lng,
+                            shelter.lat, shelter.lng
+                        );
+                    } else {
+                        shelter.distance = Infinity; // Place non-geolocated shelters at the end
+                    }
+                });
+                
+                // Sort by distance (ascending)
+                filteredShelters.sort((a, b) => a.distance - b.distance);
+            } else {
+                // Remove distance property and sort alphabetically by name if no location is available
+                filteredShelters.forEach(shelter => delete shelter.distance);
+                filteredShelters.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+
+            if (filteredShelters.length === 0) {
+                container.innerHTML = `
+                    <div class="md:col-span-4 p-6 text-center text-gray-500 bg-white rounded-xl shadow-inner mt-8 w-full">
+                        <p class="text-lg font-semibold">No shelters match your search criteria.</p>
+                        <p class="text-sm">Try broadening your search or selecting a different city/pet filter.</p>
+                    </div>
+                `;
+                container.style.gridTemplateColumns = '1fr';
+                return;
+            }
+
+            container.style.gridTemplateColumns = '';
+
+            filteredShelters.forEach(shelter => {
+                // Corrected map link generation for Google Maps search
+                const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shelter.address}, ${shelter.city}, AL ${shelter.zip}`)}`;
+
+                // Determine color based on category
+                let categoryColor = 'bg-blue-100 text-blue-800 border-blue-600';
+                if (shelter.category === 'School') categoryColor = 'bg-yellow-100 text-yellow-800 border-yellow-600';
+                if (shelter.category === 'Public') categoryColor = 'bg-red-100 text-red-800 font-bold border-red-600';
+                if (shelter.category === 'VFD') categoryColor = 'bg-green-100 text-green-800 border-green-600';
+                if (shelter.category === 'Community') categoryColor = 'bg-purple-100 text-purple-800 border-purple-600';
+
+                // Display distance if available and not Infinity (for non-geolocated shelters)
+                const distanceDisplay = shelter.distance !== undefined && shelter.distance !== Infinity ?
+                    `<p class="mt-2 text-md font-extrabold text-gray-900"><span class="text-green-600">⏱️</span> ${shelter.distance.toFixed(1)} miles away</p>` :
+                    '';
+                
+                // Capacity Badge
+                const capacityDisplay = shelter.capacity > 0 ? 
+                    `<p class="mt-1 text-sm text-gray-700 font-semibold flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-5m0 0l-1.58-1.58M17 20l-1.58-1.58M17 20l-1.58-1.58M12 11h.01M12 21a9 9 0 100-18 9 9 0 000 18z"></path></svg>
+                        Est. Capacity: ${shelter.capacity} people
+                    </p>` : '';
+
+                // Pet Friendly Badge
+                const petFriendlyBadge = shelter.petFriendly ? 
+                    `<span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-pink-100 text-pink-800 border border-pink-600 mr-2">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17z"></path></svg>
+                        Pets OK
+                    </span>` : '';
+
+                // Category Badge
+                const categoryBadge = `
+                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full ${categoryColor.replace('border-', 'bg-').replace('100', '200')}">
+                        ${shelter.category === 'VFD' ? 'VFD/Fire Station' : shelter.category}
+                    </span>
+                `;
+
+
+                const cardHtml = `
+                    <div class="shelter-card bg-white p-6 rounded-2xl shadow-lg border-t-4 ${categoryColor} flex flex-col justify-between">
+                        <div>
+                            <div class="mb-3 flex flex-wrap items-center">
+                                ${petFriendlyBadge}
+                                ${categoryBadge}
+                            </div>
+                            <h3 class="text-xl font-extrabold text-gray-900 mb-1">${shelter.name}</h3>
+                            <p class="text-xs font-semibold text-gray-500 mb-2">📍 ${shelter.county} County</p>
+                            ${distanceDisplay}
+                            ${capacityDisplay}
+                            <p class="text-sm text-gray-600 mt-2">${shelter.address}, ${shelter.city}, AL ${shelter.zip}</p>
+                            <p class="mt-3 text-sm italic text-gray-700 font-medium">${shelter.notes}</p>
+                        </div>
+                        <div class="mt-4">
+                            <a href="${mapLink}" target="_blank" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                                Get Directions (Map)
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657a4 4 0 115.656-5.656l1.414 1.414 1.414-1.414a4 4 0 015.656 5.656z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.5 12a8.5 8.5 0 11-17 0 8.5 8.5 0 0117 0z"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
+        }
+
+        // Central function to apply all filters and render
+        function applyFilters() {
+             const searchInput = document.getElementById('search-input');
+             const cityFilter = document.getElementById('city-filter');
+             // County filter removed
+             const filters = {
+                 search: searchInput.value,
+                 city: cityFilter.value,
+                 // County filter value removed
+             };
+             renderShelters(filters);
+        }
+
+        // Setup for filtering and searching. This will be called after Firebase auth is ready.
+        function setupFilters() {
+            const searchInput = document.getElementById('search-input');
+            const cityFilter = document.getElementById('city-filter');
+            const locationButton = document.getElementById('sort-by-location-btn');
+            
+            // --- 2. Populate City Filter options dynamically ---
+            // Extract unique cities and sort them alphabetically
+            const cities = [...new Set(shelterData.map(s => s.city))].sort((a, b) => a.localeCompare(b));
+            
+            // Add 'All Cities' option explicitly first
+            cityFilter.innerHTML = ''; // Clear existing options
+            const allCityOption = document.createElement('option');
+            allCityOption.value = 'all cities';
+            allCityOption.textContent = 'All Cities';
+            cityFilter.appendChild(allCityOption);
+
+            // Add the 'Pet Friendly' option
+            const petFriendlyOption = document.createElement('option');
+            petFriendlyOption.value = 'pet-friendly';
+            petFriendlyOption.textContent = '🐾 Pet Friendly Shelters';
+            cityFilter.appendChild(petFriendlyOption);
+
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.toLowerCase();
+                option.textContent = city;
+                cityFilter.appendChild(option);
+            });
+
+            // Event listeners
+            searchInput.addEventListener('input', applyFilters);
+            cityFilter.addEventListener('change', applyFilters);
+            locationButton.addEventListener('click', getUserLocationAndSort);
+
+            // Initial render
+            applyFilters();
+        }
+
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 flex items-center justify-center font-sans-inter">
+<body class="p-4 sm:p-8">
 
-    <!-- Magazine Cover Container (Fixed aspect ratio on large screens) -->
-    <div class="magazine-wrapper bg-magazine-creme text-magazine-olive rounded-xl overflow-hidden relative flex flex-col h-auto max-h-[95vh] lg:h-auto">
-        
-        <!-- Header & Masthead Section -->
-        <header class="p-4 bg-magazine-orange text-magazine-creme flex justify-between items-center rounded-t-xl shrink-0">
-            <div class="text-left">
-                <h1 class="font-serif-display text-3xl font-black tracking-widest leading-none">THE GLOBAL PLATE</h1>
-                <p class="mt-0.5 text-xs opacity-80">Food & Culinary Travel</p>
-            </div>
-            <div class="text-right text-xs space-y-0.5">
-                <p class="font-bold">NOV / DEC 2025</p>
-                <p>US $<span class="text-magazine-saffron font-extrabold text-sm">7.99</span></p>
-                <p class="opacity-80"><a href="https://www.google.com/search?q=GlobalPlateMag.com" target="_blank" class="hover:underline">GlobalPlateMag.com</a></p>
-            </div>
+    <!-- Custom message box for alerts -->
+    <div id="custom-message-box" class="hidden" role="alert">
+        <p id="message-content" class="font-medium"></p>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6 p-6 bg-white rounded-2xl shadow-xl border-b-4 border-red-600">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-800">Alabama Storm Shelter Guide</h1>
+            <p class="mt-2 text-lg text-red-600 font-semibold">Your state-wide resource for emergency safe rooms.</p>
+            <p class="mt-4 text-sm text-gray-600 max-w-2xl mx-auto">
+                **Disclaimer:** Always check local media (radio, TV, social media) or your County EMA for current shelter opening status during severe weather events.
+            </p>
+            <p class="mt-4 text-sm text-gray-400">
+                (Currently displaying 
+                <span class="font-bold text-gray-600">${shelterData.length}</span> shelters.)
+            </p>
         </header>
 
-        <!-- Main Content Area - Image dominates, headlines overlay -->
-        <main class="relative flex-grow">
-
-            <!-- Main Cover Image - Your image is now loaded here! -->
-            <div class="absolute inset-0">
-                 <img 
-                    src="https://thetravelbite.com/wp-content/uploads/2013/10/Pasta-Bolognese-25-750x1000.jpg" 
-                    alt="Close-up of a rich Pasta Bolognese dish on a rustic table in an Italian kitchen."
-                    class="w-full h-full object-cover"
-                    onerror="this.onerror=null; this.src='https://placehold.co/800x1200/AA4A1C/FAF9F6/png?text=Image+Load+Failed'"
-                />
-                <!-- Golden Light Effect overlaying the image for aesthetic flair -->
-                <div class="absolute inset-0 bg-yellow-400 opacity-10 pointer-events-none mix-blend-overlay"></div>
+        <!-- Emergency Planning Link -->
+        <div class="mb-8">
+            <div class="bg-indigo-700 p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                <p class="text-white text-lg font-semibold text-center sm:text-left">
+                    Always be prepared. View essential storm safety and emergency planning resources.
+                </p>
+                <!-- Placeholder URL for a general emergency resource -->
+                <a href="https://www.ready.gov/kit" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-indigo-700 bg-white hover:bg-gray-100 transition duration-150 ease-in-out">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    View Safety Guide
+                </a>
             </div>
+        </div>
 
-            <!-- Headline and Feature Text Overlays -->
-            <div class="absolute inset-0 p-6 flex flex-col justify-between">
-                
-                <!-- TOP HEADLINE AREA -->
-                <div class="space-y-2">
-                    <!-- Main Story Headline - Large and impactful -->
-                    <h2 class="font-serif-display text-4xl sm:text-5xl font-extrabold leading-tight text-magazine-saffron headline-text">
-                        A GRAND TOUR OF ITALY'S HIDDEN HOLIDAY KITCHENS
-                    </h2>
-                    <h3 class="text-xl font-bold text-magazine-orange headline-text">
-                        15 Classic Recipes Reimagined
-                    </h3>
-                </div>
-
-                <!-- BOTTOM FEATURES AND BARCODE AREA -->
-                <div class="space-y-4 pt-4">
-                    <!-- Side Feature List (Horizontal/Bottom alignment) -->
-                    <div class="bg-magazine-creme/90 backdrop-blur-sm p-4 rounded-lg border-l-4 border-magazine-olive shadow-xl">
-                        <h4 class="text-sm font-extrabold text-magazine-olive border-b border-magazine-saffron pb-1 mb-2">MORE INSIDE</h4>
-                        <div class="space-y-2 text-sm text-magazine-olive">
-                            <!-- 2nd Story -->
-                            <p class="leading-tight">
-                                <span class="font-bold text-magazine-orange">SPICE TRAIL:</span> How One Ingredient Changed Winter Desserts Forever
-                            </p>
-                            <!-- 3rd Story -->
-                            <p class="leading-tight">
-                                <span class="font-bold text-magazine-orange">TOURIST TRAP:</span> Finding Authentic Street Food in Marrakech
-                            </p>
-                            <!-- 4th Story -->
-                            <p class="leading-tight">
-                                <span class="font-bold text-magazine-orange">QUICK & COZY:</span> 5 Weeknight Dinners That Taste Like a Weekend Feast
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Barcode and Price Container -->
-                    <div class="flex justify-end pr-0">
-                        <!-- Barcode Section (Bottom Right) -->
-                        <div class="w-32 h-16 flex flex-col items-center justify-end bg-magazine-creme p-1 rounded-sm border border-magazine-olive/30 shadow-md">
-                            <!-- Price Display above the code -->
-                            <div class="text-magazine-olive text-xs font-bold w-full text-center mb-0.5">
-                                US $<span class="text-magazine-orange text-sm font-extrabold">7.99</span>
-                            </div>
-
-                            <!-- Simple Barcode SVG Placeholder -->
-                            <svg class="w-full h-10" viewBox="0 0 100 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- White background for the code area -->
-                                <rect x="0" y="0" width="100" height="50" fill="#FFFFFF"/>
-                                
-                                <!-- Mock UPC/EAN Bars (representing a magazine code) -->
-                                <rect x="5" y="5" width="2" height="40" fill="#000000"/>
-                                <rect x="10" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="13" y="5" width="3" height="40" fill="#000000"/>
-                                <rect x="18" y="5" width="2" height="40" fill="#000000"/>
-                                <rect x="23" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="25" y="5" width="4" height="40" fill="#000000"/>
-                                
-                                <rect x="35" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="38" y="5" width="1" height="40" fill="#000000"/>
-                                
-                                <rect x="42" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="44" y="5" width="3" height="40" fill="#000000"/>
-                                <rect x="50" y="5" width="2" height="40" fill="#000000"/>
-                                <rect x="55" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="58" y="5" width="2" height="40" fill="#000000"/>
-                                <rect x="63" y="5" width="3" height="40" fill="#000000"/>
-                                
-                                <rect x="75" y="5" width="1" height="40" fill="#000000"/>
-                                <rect x="78" y="5" width="1" height="40" fill="#000000"/>
-
-                                <rect x="85" y="5" width="2" height="20" fill="#000000"/>
-                                <rect x="88" y="5" width="1" height="20" fill="#000000"/>
-
-                            </svg>
-                            <!-- Mock UPC Numbers -->
-                            <p class="text-[0.6rem] font-mono text-magazine-olive/80 mt-0.5">977123456789</p>
-                        </div>
-                    </div>
-                </div>
+        <!-- Live Weather Radar Section -->
+        <div class="mb-8 p-6 bg-white rounded-2xl shadow-xl border-t-4 border-blue-600">
+            <h2 class="text-2xl font-extrabold text-gray-800 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Alabama Live Weather Radar
+            </h2>
+            <p class="text-sm text-gray-600 mb-3">
+                This is a live radar view centered on North Alabama. Use this to track storms.
+                **Note:** Radar data is provided by the National Weather Service (NWS) and may take a moment to load.
+            </p>
+            <div class="radar-container rounded-xl overflow-hidden shadow-inner border border-gray-300">
+                <!-- Using the NWS Huntsville (KHTX) radar with a map-only view for best embedding stability -->
+                <iframe 
+                    src="https://radar.weather.gov/station/KHTX/standard" 
+                    frameborder="0" 
+                    allowfullscreen>
+                </iframe>
             </div>
-
-        </main>
+        </div>
         
-        <!-- Footer/Motto (Optional, but adds polish) -->
-        <footer class="p-2 text-center text-xs bg-magazine-orange/80 text-magazine-creme/90 shrink-0">
-            Your Passport to the World's Most Incredible Flavors
+        <!-- Search and Filter Controls: Adjusted grid from 5 to 4 columns -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4 items-center">
+            
+            <div class="md:col-span-2">
+                <label for="search-input" class="sr-only">Search Shelters</label>
+                <input type="text" id="search-input" placeholder="Search by name, road, city, or county..." class="w-full p-3 border border-gray-300 rounded-xl focus:ring-red-500 focus:border-red-500 shadow-sm text-gray-700" />
+            </div>
+
+            <div class="sm:col-span-1">
+                <label for="city-filter" class="sr-only">Filter by City/Pets</label>
+                <select id="city-filter" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-red-500 focus:border-red-500 shadow-sm text-gray-700 bg-white">
+                    <!-- Options populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="sm:col-span-3 md:col-span-1 flex flex-col items-center">
+                <button id="sort-by-location-btn"
+                        class="w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657a4 4 0 115.656-5.656l1.414 1.414 1.414-1.414a4 4 0 015.656 5.656z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10a2 2 0 100-4 2 2 0 000 4z"></path></svg>
+                    Use My Location to Sort by Closest
+                </button>
+                <p id="location-status" class="text-xs mt-1 font-semibold text-center hidden"></p>
+            </div>
+        </div>
+
+        <!-- Shelter Grid Container -->
+        <div id="shelter-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Shelter cards will be injected here by JavaScript -->
+        </div>
+
+        <!-- Footer / Contact Info -->
+        <footer class="mt-12 p-6 text-center text-gray-500 text-sm">
+            <p>A vital community resource for Alabama storm preparedness.</p>
+            <p class="mt-1">For official emergency information, contact your County Emergency Management Agency (EMA).</p>
+            <link rel="manifest" href="manifest.json">
         </footer>
     </div>
+
+    <!-- Firebase SDK Imports and Initialization Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase
+        let db = null;
+        let auth = null;
+        let currentUserId = 'anonymous';
+        let appId = 'default-app-id';
+
+        // --- Firebase Initialization (Kept simple to ensure setupFilters runs after environment is ready) ---
+
+        async function setupFirebase() {
+            try {
+                // Retrieve global variables
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Sign in logic
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Wait for auth state to be confirmed
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        console.log("Firebase initialized. User ID:", currentUserId);
+                        setupFilters(); 
+                    } else {
+                        currentUserId = 'anonymous-error';
+                        setupFilters();
+                    }
+                });
+
+            } catch (error) {
+                console.error("Fatal Error setting up Firebase:", error);
+                alertMessage("Error setting up application. Geolocation features may be affected.", "error");
+                // Fallback: run filters even if Firebase failed
+                setupFilters(); 
+            }
+        }
+        
+        // Start the application setup
+        window.onload = setupFirebase;
+    </script>
 
 </body>
 </html>
